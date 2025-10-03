@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    Index Page
+{% endblock %}
+
+{% block css%}
+    {% static 'home/css/index.css' %}
+{% endblock %}
+
+{% block content %}
+    <div class="categories mb-2 mt-2">
+        <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+            لیست محصولات
+        </button>
+
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+            <div class="offcanvas-header">
+                <h5 id="offcanvasRightLabel">لیست محصولات</h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="category-tree list-unstyled">
+                    {% for category in categories %}
+                        {% include 'home/category_tree.html' with category=category %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for product in page_obj %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 product-card">
+                    <a href="{{ product.get_absolute_url }}">
+                        {% if product.images.first %}
+                            <img src="{{ product.images.first.image.url }}" class="card-img-top" alt="{{ product.slug }}">
+                        {% else %}
+                            <img src="{% static 'home/images/default.png' %}" class="card-img-top" alt="default image">
+                        {% endif %}
+                    </a>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p>تومان: {{ product.price }}</p>
+                        <p>{{ product.average_rating|default:"0" }} / 5
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p>هیچ محصولی پیدا نشد</p>
+        {% endfor %}
+    </div>
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center mt-4">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if category_slug %}&category_slug={{ category_slug }}{% endif %}">قبلی</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">قبلی</span></li>
+            {% endif %}
+
+            {% if page_obj.number > 3 %}
+                <li class="page-item"><a class="page-link" href="?page=1{% if category_slug %}&category_slug={{ category_slug }}{% endif %}">1</a></li>
+                {% if page_obj.number > 4 %}
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+                    {% if num == page_obj.number %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if category_slug %}&category_slug={{ category_slug }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+                {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if category_slug %}&category_slug={{ category_slug }}{% endif %}">{{ page_obj.paginator.num_pages }}</a></li>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if category_slug %}&category_slug={{ category_slug }}{% endif %}">بعدی</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">بعدی</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {# لود کردن فایل جاوااسکریپت #}
+    <script src="{% static 'home/js/category-tree.js' %}"></script>
+{% endblock %}

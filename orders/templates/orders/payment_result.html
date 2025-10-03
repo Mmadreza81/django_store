@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}نتیجه پرداخت{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    {% if status == "success" %}
+        <div class="alert alert-success text-center p-5 shadow">
+            <h3 class="mb-3">✅ پرداخت با موفقیت انجام شد</h3>
+            <p class="lead">کد رهگیری شما:</p>
+            <h4 class="fw-bold text-dark">{{ ref_id }}</h4>
+            <a href="{% url 'home:home' %}" class="btn btn-primary mt-4">بازگشت به صفحه اصلی</a>
+        </div>
+
+    {% elif status == "failed" %}
+        <div class="alert alert-danger text-center p-5 shadow">
+            <h3 class="mb-3">❌ پرداخت ناموفق بود</h3>
+            <p class="lead">کد وضعیت: <span class="fw-bold">{{ error_code }}</span></p>
+            <a href="{% url 'orders:cart' %}" class="btn btn-warning mt-4">بازگشت به سبد خرید</a>
+        </div>
+
+    {% elif status == "canceled" %}
+        <div class="alert alert-secondary text-center p-5 shadow">
+            <h3 class="mb-3">⚠️ پرداخت توسط کاربر لغو شد</h3>
+            <p class="lead">می‌توانید دوباره تلاش کنید.</p>
+            <a href="{% url 'home:home' %}" class="btn btn-outline-primary mt-4">بازگشت به صفحه اصلی</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+<li class="category-item">
+    <div class="category-header d-flex justify-content-between align-items-center" data-toggle="collapse">
+        <a href="{{ category.get_absolute_url }}" class="category-link">
+            {{ category.name }}
+        </a>
+        {% if category.scategory.exists %}
+            <span class="toggle-icon">▶</span>
+        {% endif %}
+    </div>
+
+    {% if category.scategory.exists %}
+        <ul class="collapse category-children list-unstyled ms-3">
+            {% for sub in category.scategory.all %}
+                {% include 'home/category_tree.html' with category=sub %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+</li>

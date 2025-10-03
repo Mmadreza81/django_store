@@ -1,0 +1,15 @@
+.commentcontainer {
+    padding: 10px;
+    margin-left: 100px;
+    margin-right: 100px;
+}
+
+.star {
+    font-size: 2rem;
+    cursor: pointer;
+    color: #ccc;
+}
+
+.star.selected {
+    color: gold;
+}

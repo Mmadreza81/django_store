@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+	Profile
+{% endblock %}
+{% block extra_js %}
+	<script>
+        const csrftoken = document.cookie
+            .split(', ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+    </script>
+{% endblock %}
+{% block content %}
+    <div class="card">
+        {% if profile %}
+            <div style="display: flex">
+                {% if profile.image %}
+                	<img class="card-body" src="{{ profile.image.url }}" alt="profile picture" width="200" style="border-radius: 50%">
+                {% else %}
+                    <img src="{% static 'accounts/images/default.jpeg'%}" alt="default image" width="200" style="border-radius: 50%">
+                {% endif %}
+                <h2 class="card-body">{{ user.username }}</h2>
+            </div>
+            {% if profile.full_name is not None %}
+                <p class="card-body">{{ profile.full_name }}</p>
+            {% endif %}
+            {% if profile.age is not 0 and profile.age is not None %}
+                <p class="card-body">{{ profile.age }}</p>
+            {% endif %}
+            {% if request.user.id == user.id %}
+            	<a class="card-body" aria-current="page" href="{% url 'orders:cart' %}">Cart({{ cart|length }})</a>
+            {% endif %}
+        {% else %}
+            <h2 class="card-body">{{ user.username }}</h2>
+        {% endif %}
+        {% if request.user.id == user.id %}
+            <a href="{% url 'accounts:edit_user' %}" class="btn btn-info">Edit profile</a>
+            <a href="{% url 'accounts:manage_addresses' %}" class="btn btn-outline-dark">آدرس ها</a>
+        {% endif %}
+    </div>
+{% endblock %}
