@@ -1,0 +1,105 @@
+{%  extends  'base.html'%}
+{% load static%}
+{% block title %}
+	Detail
+{% endblock %}
+{% block css %}
+	{% static 'home/css/detail.css' %}
+{% endblock %}
+{% block content %}
+    <h2>{{ product.name }}</h2>
+    <div style="display: flex;gap: 10px;flex-wrap: wrap;">
+        {% if product.images.all %}
+        	{% for image in product.images.all %}
+        		<img src="{{ image.image.url }}" alt="{{ product.slug }}" style="width: 300px;">
+        	{% endfor %}
+        {% else %}
+            <img src="{% static 'home/images/default.png' %}" alt="default image" style="width: 300px;">
+        {% endif %}
+    </div>
+    <p>{{ product.description|safe }}</p>
+    <h6>{{ product.price }} Toman</h6>
+    <p>موجودی: {{ product.stock }}</p>
+    <small>{{ product.created }}</small><br><br>
+    <p>{{ average_rating|default:"0" }} / 5
+        <i class="bi bi-star-fill text-warning"></i>
+    </p>
+    {% if request.user.is_authenticated%}
+        <form action="" method="post" id="rating-form">
+            {% csrf_token %}
+            <div id="rating-stars" data-product="{{ product.id }}" data-user-rating="{{ user_rating|default:0 }}">
+                {% for i in "12345" %}
+                	<i class="bi bi-star star" data-value="{{ forloop.counter }}"></i>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="score" id="rating-value" value="{{ user_rating|default:0 }}">
+            <input class="btn btn-primary" type="submit" value="submit rating">
+        </form>
+    {% endif %}
+    {#check the user permission#}
+    {#{% if perms.home.add_order %}#}
+        <form action="{% url 'orders:cart_add' product.id%}" method="post" novalidate>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="add to cart">
+        </form>
+    {#{% endif %}#}
+
+    <button class="btn btn-success col-md-2" style="margin-left: 10px" onclick="toggleCommentForm()">ثبت نظر</button>
+    <div id="comment-form" style="display: none;margin-top: 10px;width: 350px">
+        <form action="" method="post" style="width: 350px">
+            {% csrf_token %}
+            {{ comments_form.as_p }}
+            <input class="btn btn-secondary" {% if request.user.is_authenticated%} type="submit"{% else %} type="reset" {% endif %} value="Send">
+        </form>
+    </div><br>
+    <div class="commentcontainer">
+        <p>{% if  comments.count == 1%}
+            {{ comments.count }} comment<br>
+        {% elif comments.count > 1%}
+            {{ comments.count}} comments<br>
+        {% endif %}</p>
+        {% for comment in comments %}
+            <div class="card bg-dark text-white">
+                <p class="card-header">
+                    {{ comment.user }} | {{ comment.created|timesince }}</p>
+                <p class="card-body" style="margin-bottom: 5px">{{ comment.body }}</p>
+                <div class="card-body" style="padding-top: 0">
+                    <a href="{% url 'rating_comments:delete_comment' product.slug comment.id%}" class="btn btn-danger">Delete</a>
+                    {% if request.user.is_authenticated %}
+                        <button class="btn btn-secondary" onclick="toggleReplyForm({{ comment.id }})">reply</button>
+                        <div id="reply-form-{{ comment.id }}" style="display: none;margin-top: 10px;">
+                            <form action="{% url 'rating_comments:add_reply' product.slug comment.id%}" method="post">
+                                {% csrf_token %}
+                                {{ reply_form.as_p }}
+                                <input class="btn btn-light" style="margin-left: 10px;" type="submit" value="send">
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+                {% with replies=comment.rcomments.all %}
+                    {% for reply in replies %}
+                        <div class="bg-primary p-3 m-2" style="border-radius: 10px">
+                            <p>{{ reply.user }} to {{ reply.reply.user }} | {{ reply.created|timesince }}</p>
+                            <p>{{ reply.body }}</p>
+                            <a href="{% url 'rating_comments:delete_comment' product.slug reply.id%}" class="btn btn-danger">Delete</a>
+                            {% if request.user.is_authenticated %}
+                                <button class="btn btn-secondary" onclick="toggleReplyForm({{ reply.id }})">reply</button>
+                                <div id="reply-form-{{ reply.id }}" style="display: none;margin-top: 10px;">
+                                    <form action="{% url 'rating_comments:add_reply' product.slug reply.id%}" method="post">
+                                        {% csrf_token %}
+                                        {{ reply_form.as_p }}
+                                        <input class="btn btn-light" style="margin-left: 10px;" type="submit" value="send">
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% endwith %}
+            </div><br>
+        {% empty %}
+            <P>No comment yet</P>
+        {% endfor %}
+    </div>
+    <script src="{% static 'home/js/detail.js' %}"></script>
+{% endblock %}
